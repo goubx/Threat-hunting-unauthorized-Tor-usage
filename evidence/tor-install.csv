@@ -1,0 +1,2 @@
+﻿Timestamp,DeviceName,AccountName,ActionType,FileName,ProcessCommandLine
+"Jun 20, 2026 2:23:00 PM",WIN-TARGET-01,user,ProcessCreated,tor-browser-windows-x86_64-portable-15.0.16.exe,tor-browser-windows-x86_64-portable-15.0.16.exe  /S
