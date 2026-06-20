@@ -1,0 +1,37 @@
+// ============================================================
+// Hunting Unauthorized TOR Browser Usage
+// Platform: Microsoft Defender for Endpoint (Advanced Hunting)
+// Note: hostname and account sanitized. Replace placeholders
+//       with your real values when running.
+// ============================================================
+
+
+// 1. File events: the TOR install footprint
+DeviceFileEvents
+| where DeviceName == "WIN-TARGET-01"
+| where FileName contains "tor"
+| where InitiatingProcessAccountName == "user"
+| order by Timestamp desc
+| project Timestamp, DeviceName, ActionType, FileName, FolderPath, SHA256, Account = InitiatingProcessAccountName
+
+
+// 2. Process events: the silent installer
+DeviceProcessEvents
+| where ProcessCommandLine contains "tor-browser-windows"
+| project Timestamp, DeviceName, AccountName, ActionType, FileName, ProcessCommandLine
+
+
+// 3. Process events: the browser actually running
+DeviceProcessEvents
+| where DeviceName == "WIN-TARGET-01"
+| where FileName has_any ("tor.exe", "firefox.exe", "tor-browser.exe")
+| project Timestamp, DeviceName, AccountName, ActionType, FileName, FolderPath, SHA256, ProcessCommandLine
+| order by Timestamp desc
+
+
+// 4. Network events: connections over known TOR ports
+DeviceNetworkEvents
+| where DeviceName == "WIN-TARGET-01"
+| where InitiatingProcessAccountName != "system"
+| where RemotePort in ("9001", "9030", "9040", "9050", "9051", "9150")
+| project Timestamp, DeviceName, InitiatingProcessAccountName, ActionType, RemoteIP, RemotePort, RemoteUrl, InitiatingProcessFileName, InitiatingProcessFolderPath
